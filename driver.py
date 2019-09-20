@@ -8,7 +8,9 @@ from selenium.webdriver.support.ui import Select
 import time
 from os.path import abspath
 from threading import Thread
-
+from firstPass import FirstPassParse
+from secondPass import SecondPassParse
+from pprint import pprint
 
 SyllabiDirectory = 'Syllabi'
 SessionSelectID = 'session_cd'
@@ -21,6 +23,7 @@ def loginSite(browser, username, password):
     passwordName.send_keys(password)
     browser.find_element_by_xpath("//input[@type='submit']").click()
     WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'fippa')))
+    print('logged in')
     return
 
 def setSelect(driver, select_id, option_value):
@@ -30,14 +33,18 @@ def setSelect(driver, select_id, option_value):
 
 def gatherSyllabi(browser, value, departments):
     setSelect(browser, SessionSelectID, value)
+    coursesSeen = set()
     for department in departments:
+        print('running', department)
         setSelect(browser, DepartmentSelectID, department)
         WebDriverWait(browser,60).until(EC.presence_of_element_located((By.XPATH, "//input[@value='Search']"))).click()
         WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'fippa')))
         rows = browser.find_elements_by_xpath('//tbody/tr')
         for row in rows:
-            text = row.find_elements_by_xpath('./td')[3].text.strip().upper()
-            if text == 'LEC0101':
+            text = row.find_elements_by_xpath('./td')[1].text.strip()
+            if text not in coursesSeen:
+                print(text)
+                coursesSeen.add(text)
                 link = row.find_element_by_xpath(".//a").click()
                 while len(browser.window_handles) > 1:
                     time.sleep(0.5)
@@ -59,8 +66,7 @@ def handleInput():
     return (username,password,term,year)
 
 if __name__ == '__main__':
-    #username,password,term,value=handleInput()
-    
+    username,password,term,value=handleInput()
     if term == 'Fall':
         value += '9'
     elif term == 'Winter':
@@ -76,5 +82,8 @@ if __name__ == '__main__':
     
     loginSite(browser, username, password)
     gatherSyllabi(browser, value, departments)
-        
-            
+    time.sleep(3)
+    browser.quit()
+    first = FirstPassParse()
+    SecondPassParse(first)
+    
