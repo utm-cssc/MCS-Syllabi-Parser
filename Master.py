@@ -29,9 +29,21 @@ def loadChromeDriver():
 def createBrowser(url = '', headless=False, blockImages=True, hideConsole = False, downloadDirectory=None):
     loadChromeDriver()
     chromeOptions = ChromeOptions()
-    if blockImages: prefs = {"profile.managed_default_content_settings.images":2}; chromeOptions.add_experimental_option("prefs",prefs)
-    if headless: chromeOptions.add_argument("--headless"); chromeOptions.add_argument("--window-size=1920x1080")
-    if downloadDirectory: chromeOptions.add_argument("download.default_directory="+downloadDirectory)
+    prefs = {}
+    if blockImages: 
+        prefs["profile.managed_default_content_settings.images"] = 2
+        
+    if headless: 
+        chromeOptions.add_argument("--headless")
+        chromeOptions.add_argument("--window-size=1920x1080")
+    
+    if downloadDirectory: 
+        prefs["download.default_directory"] = downloadDirectory+'\\'
+        prefs["directory_upgrade"] = True
+    
+    if downloadDirectory or blockImages:
+        chromeOptions.add_experimental_option("prefs",prefs)
+    
     chrome_serv = webdriver.myService('path--to--exe.exe')
     chrome_serv.service_args = ["hide_console", ]
     if isfile('Master/chromedriver.exe'):
