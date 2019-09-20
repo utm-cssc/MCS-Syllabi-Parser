@@ -5,12 +5,15 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
+import time
+from os.path import abspath
 
-SyllabiDirectory = 'Syllabi/'
+
+SyllabiDirectory = 'Syllabi'
 SessionSelectID = 'session_cd'
 DepartmentSelectID = 'department_id'
 
-def gatherSyllabi(browser, username, password):
+def loginSite(browser, username, password):
     userName = WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'username')))
     passwordName = WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'password')))
     userName.send_keys(username)
@@ -24,20 +27,36 @@ def setSelect(select_id, option_value):
     select.select_by_value(option_value)
     return
 
-if __name__ == '__main__':
+def gatherSyllabi(browser, value, departments):
+    setSelect(SessionSelectID, value)
+    for department in departments:
+        setSelect(DepartmentSelectID, department)
+        WebDriverWait(browser,60).until(EC.presence_of_element_located((By.XPATH, "//input[@value='Search']"))).click()
+        WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'fippa')))
+        links = browser.find_elements_by_xpath("//a[@title='Download Outline']")
+        for i in links:
+            i.click()
+            while len(browser.window_handles) > 1:
+                time.sleep(0.5)
+            WebDriverWait(browser,60).until(EC.presence_of_element_located((By.ID, 'fippa')))
+
+def handleInput():
     username = input("Username: ")
     password = getpass()
     term = input("Fall, Winter, Summer?: ").strip().title()
     year = input("Year: ").strip()
     if term not in ('Fall','Winter','Summer'):
         print('Incorrect Term: Require "Fall", "Winter" or "Summer"')
-        return
+        return None
     try:
         int(year)
     except:
         print('Incorrect Year: Require Integer')
-        return
-    value = year
+        return None
+    return (username,password,term,year)
+
+if __name__ == '__main__':
+    username,password,term,value=handleInput()
     if term == 'Fall':
         value += '9'
     elif term == 'Winter':
@@ -48,11 +67,9 @@ if __name__ == '__main__':
     browser = createBrowser(url='https://student.utm.utoronto.ca/CourseInfo/index.php',
                             headless=False,
                             blockImages=False,
-                            hideConsole=False)
-    gatherSyllabi(browser)
-    setSelect(SessionSelectID, value)
-    for department in departments:
-        setSelect(DepartmentSelectID, department)
-        WebDriverWait(browser,60).until(EC.presence_of_element_located((By.XPATH, "//input[@value='Search']")))
+                            hideConsole=False,
+                            downloadDirectory=abspath(SyllabiDirectory))
+    loginSite(browser, username, password)
+    gatherSyllabi(browser, value, departments)
     
             
