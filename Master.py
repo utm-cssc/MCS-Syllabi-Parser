@@ -12,7 +12,7 @@ from selenium.webdriver.chrome.options import Options as ChromeOptions
 from selenium.webdriver.chrome.webdriver import WebDriver
 
 def createBrowser(url = '', headless=False, blockImages=True, hideConsole = False, downloadDirectory=None) -> WebDriver:
-     if not isfile('Master/chromedriver.exe'):
+    if not isfile('Master/chromedriver.exe'):
          print("Missing chromedriver.exe file")
          return None
     chromeOptions = ChromeOptions()

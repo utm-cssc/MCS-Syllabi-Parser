@@ -4,27 +4,34 @@ import csv
 import re
 def FirstPassParse():
     files = ['Syllabi\\'+f for f in os.listdir('Syllabi') if os.path.isfile('Syllabi\\'+f)]
-    matcher = re.compile(r'(\d{4}-\d{1,2}-\d{1,2})')
+
+    matchDates = re.compile(r'(\d{4}-\d{1,2}-\d{1,2})')
     outputList = []
-    for f in files:
-        if '.pdf' not in f:
+    for filename in files:
+        if '.pdf' not in filename:
             continue
-        doc = fitz.open(f)
-        outputList.append([f])
+        document = fitz.open(filename)
+        outputList.append([filename])
         vals = []
-        for i in range(doc.pageCount):
-            page = doc.loadPage(i)
-            text = page.getText()
-            lst = text.split('\n')
+        for pagenum in range(document.pageCount):
+            page = document.loadPage(pagenum)
+            text = page.getText().replace(',','')
+            allText = text.split('\n')
             index = 0
-            for l in lst:
-                j=matcher.search(l)
-                if j:
-                    concat = ' '.join(lst[index-2:index+1])
-                    if concat and concat[-1] != '%':
-                        concat = ' '.join(lst[index-1:index+2])
-                    if ':' not in concat:
-                        vals.append(concat)
+            for line in allText:
+                match=matchDates.search(line)
+                if match:
+                    if ':' in line:
+                        continue
+                    #window to get assignment type, assignment description, assignment date, assignment value
+                    concat = allText[index-2:index+2]
+                    #some profs skip the description, in which case our window will be off by one
+                    if not concat:
+                        concat = allText[index-1:index+2]
+                    ts = ''.join(concat)
+                    if concat and (ts.count('%') > 1 or 'Weight' in ts):
+                        concat = allText[index-1:index+2]
+                    vals.append(concat)
                 index+=1
         outputList.append(vals)
     return outputList

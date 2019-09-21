@@ -60,11 +60,11 @@ def handleInput() -> tuple:
 
     if term not in ('Fall','Winter','Summer'):
         print('Incorrect Term: Require "Fall", "Winter" or "Summer"')
-        return None
+        return None,None,None,None
 
     if not year.isnumeric():
         print('Incorrect Year: Require Integer')
-        return None
+        return None,None,None,None
 
     return (username,password,term,year)
 
@@ -77,18 +77,18 @@ if __name__ == '__main__':
     elif term == 'Summer':
         value += '5'
     departments = ['7', '27', '38']
-    browser = createBrowser(url='https://student.utm.utoronto.ca/CourseInfo/index.php',
-                            headless=False,
-                            blockImages=False,
-                            hideConsole=True,
-                            downloadDirectory=abspath(SyllabiDirectory))
-    if not browser:
-        return
+    #browser = createBrowser(url='https://student.utm.utoronto.ca/CourseInfo/index.php',
+    #                        headless=False,
+    #                        blockImages=False,
+    #                        hideConsole=True,
+    #                        downloadDirectory=abspath(SyllabiDirectory))
+    #if not browser:
+    #    exit()
     
-    loginSite(browser, username, password)
-    gatherSyllabi(browser, value, departments)
-    time.sleep(3)
-    browser.quit()
+    #loginSite(browser, username, password)
+    #gatherSyllabi(browser, value, departments)
+    #time.sleep(3)
+    #browser.quit()
     first = FirstPassParse()
     SecondPassParse(first)
     
