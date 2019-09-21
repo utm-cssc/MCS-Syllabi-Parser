@@ -9,25 +9,12 @@ from ast import literal_eval
 from os.path import isfile, abspath
 import zlib
 from selenium.webdriver.chrome.options import Options as ChromeOptions
+from selenium.webdriver.chrome.webdriver import WebDriver
 
-
-def loadChromeDriver():
-    if not isfile('Master/chromedriver.exe') and isfile('Master/chromedriver.dat'):
-        file = list(open('Master/chromedriver.dat'))
-        data = literal_eval(file[0])
-        n = 'Master/chromedriver.exe'
-        Icon = data
-        icondata = zlib.decompress(b64decode(Icon))
-        tempFile = n
-        iconfile = open(tempFile,"wb")
-        iconfile.write(icondata)
-        iconfile.close()
-        print('built ChromeDriver')
-    if not isfile('Master/chromedriver.dat'):
-        print('ERROR:NO DATA FILE')
-
-def createBrowser(url = '', headless=False, blockImages=True, hideConsole = False, downloadDirectory=None):
-    loadChromeDriver()
+def createBrowser(url = '', headless=False, blockImages=True, hideConsole = False, downloadDirectory=None) -> WebDriver:
+     if not isfile('Master/chromedriver.exe'):
+         print("Missing chromedriver.exe file")
+         return None
     chromeOptions = ChromeOptions()
     prefs = {}
     if blockImages: 
@@ -61,7 +48,7 @@ def createBrowser(url = '', headless=False, blockImages=True, hideConsole = Fals
         browser.get(url)
     return browser
 
-def Pkill(string='chromedriver.exe'):
+def Pkill(string='chromedriver.exe') -> None:
     import psutil
     for proc in psutil.process_iter():
         # check whether the process name matches
